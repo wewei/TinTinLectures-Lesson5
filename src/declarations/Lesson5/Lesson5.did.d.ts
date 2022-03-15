@@ -10,6 +10,7 @@ export interface _SERVICE {
   'follow' : (arg_0: Principal) => Promise<undefined>,
   'follows' : () => Promise<Array<Principal>>,
   'get_name' : () => Promise<string>,
+  'get_owner' : () => Promise<[] | [Principal]>,
   'post' : (arg_0: string) => Promise<undefined>,
   'posts' : (arg_0: Time) => Promise<Array<Message>>,
   'set_name' : (arg_0: string) => Promise<undefined>,

@@ -43,6 +43,9 @@
   ],
   "dependencies": {
     "@dfinity/auth-client": "^0.10.3",
+    "@ts-monad/observable": "^0.2.0-0",
+    "@ts-monad/observable-ext": "^0.0.1-1",
+    "@ts-monad/observable-react": "^0.1.0",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
   }

@@ -10,7 +10,6 @@ service : {
   follow: (principal) -> ();
   follows: () -> (vec principal) query;
   get_name: () -> (text) query;
-  get_owner: () -> (opt principal) query;
   post: (text) -> ();
   posts: (Time) -> (vec Message) query;
   set_name: (text) -> ();

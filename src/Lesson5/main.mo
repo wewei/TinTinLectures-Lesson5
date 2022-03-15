@@ -23,12 +23,19 @@ actor {
   };
 
   stable var owner: ?Principal = null;
-  stable var name: Text = "Anonymouse";
+  stable var name: Text = "Anonymous";
   stable var followees : List<Principal> = List.nil();
   stable var messages: List<Message> = List.nil();
 
+  public shared query func get_owner(): async ?Principal {
+    owner
+  };
+
   public shared({ caller }) func claim_owner(): async () {
     owner := ?caller;
+    name := "Anonymous";
+    followees := List.nil();
+    messages := List.nil();
   };
 
   public shared({ caller }) func set_name(newName: Text): async () {
@@ -38,7 +45,7 @@ actor {
   };
 
   public shared query({ caller }) func get_name(): async Text {
-    return name;
+    name
   };
 
   public shared({ caller }) func follow(followee: Principal): async () {
