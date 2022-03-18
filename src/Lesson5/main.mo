@@ -66,7 +66,7 @@ actor {
   };
 
   public shared query func posts(since: Time): async [Message] {
-    List.toArray(List.filter<Message>(messages, func ({ time }) = time >= since))
+    List.toArray(List.filter<Message>(messages, func ({ time }) = time > since))
   };
 
   public shared({ caller }) func timeline(since: Time): async [Message] {

@@ -1,8 +1,11 @@
-import { AuthenticatedViewProps } from "./IIAuth";
-import { obOwner, obIdentity, obOwnerStatus } from "../model/Agent";
-import Microblog from "./Microblog";
-import { useObservable } from "../hooks/Observable";
+import type { AuthenticatedViewProps } from "./IIAuth";
+
 import { useEffect } from "react";
+import { obIdentity } from "../model/Agent";
+import { useObservable } from "../hooks/Observable";
+import { obOwner, obOwnerStatus } from "../model/Owner";
+
+import Microblog from "./Microblog";
 
 export default function ({
   identity,
