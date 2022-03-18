@@ -1,7 +1,7 @@
 import { render } from "react-dom";
 
 import IIAuth, { AnonymousViewProps } from "./components/IIAuth";
-import MicroblogView from "./components/MicroblogView";
+import Main from "./components/Main";
 
 function AnonymousView({ login, error }: AnonymousViewProps): JSX.Element {
   return (
@@ -27,7 +27,7 @@ const identityProvider =
 
 render(
   <IIAuth
-    AuthenticatedView={MicroblogView}
+    AuthenticatedView={Main}
     AnonymousView={AnonymousView}
     PreparingView={PreparingView}
     AuthenticatingView={AuthenticatingView}
@@ -35,21 +35,3 @@ render(
   />,
   document.getElementById("main")
 );
-
-// document.querySelector("form").addEventListener("submit", async (e) => {
-//   e.preventDefault();
-//   const button = e.target.querySelector("button");
-
-//   const name = document.getElementById("name").value.toString();
-
-//   button.setAttribute("disabled", true);
-
-//   // Interact with foo actor, calling the greet method
-//   const greeting = await Lesson5.greet(name);
-
-//   button.removeAttribute("disabled");
-
-//   document.getElementById("greeting").innerText = greeting;
-
-//   return false;
-// });
