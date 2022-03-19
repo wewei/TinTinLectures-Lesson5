@@ -16,23 +16,27 @@ export const mutable = <A>(initial: A, release: F = () => {}): Mutable<A> => {
   };
 };
 
-export const encapsulated = <A, M extends Record<string, AnyF>>(
-  initial: A,
-  f: (m: Mutable<A>) => M
-): M & Observable<A> => {
-  const m = mutable(initial);
-  const { subscribe, isSubscribed, current, release } = m;
-  return { subscribe, isSubscribed, current, release, ...f(m) };
-};
+export const encapsulated =
+  <A>(initial: A) =>
+  <M extends Record<string, AnyF>>(
+    f: (m: Mutable<A>) => M
+  ): M & Observable<A> => {
+    const m = mutable(initial);
+    const { subscribe, isSubscribed, current, release } = m;
+    return { subscribe, isSubscribed, current, release, ...f(m) };
+  };
 
-export const observable = <A>(initial: A, sA: Signal<A>): Observable<A> =>
-  encapsulated(initial, ({ notify }) => ({
+export const observable = <A>(
+  initial: A,
+  sA = dummy as Signal<A>
+): Observable<A> =>
+  encapsulated(initial)(({ notify }) => ({
     release: sA.subscribe(notify),
   }));
 
 // As Monad
 export const ObservableMonad = monadFor({
-  pure: <A>(a: A) => observable(a, dummy as Signal<A>),
+  pure: <A>(a: A) => observable(a),
   bind<A, B>(f: F<Observable<A>, B>) {
     return (oB: Observable<B>) => {
       let oA = f(oB.current());

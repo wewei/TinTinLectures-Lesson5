@@ -1,16 +1,19 @@
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { useObservable } from "../hooks/Observable";
 import { obMyPosts, obNewPost } from "../model/Message";
-import { MaybeMonad as M, nothing } from "../model/monad/Maybe";
+import { fromMaybe, MaybeMonad as M, nothing } from "../model/monad/Maybe";
+import { ObservableMonad as O } from "../model/monad/Observable";
+import { nameFor } from "../model/Name";
+import MessageView from "./MessageView";
 
 export default () => {
   const { messages, isRefreshing } = useObservable(obMyPosts);
   const newPost = useObservable(obNewPost);
   const [content, setContent] = useState("");
+
   useEffect(() => {
     obMyPosts.update();
   }, []);
-  console.log("render", newPost, isRefreshing, messages);
   return (
     <div>
       <div>
@@ -32,14 +35,12 @@ export default () => {
       <ul>
         {M.fmapU(newPost, (p) => (
           <li style={{ backgroundColor: "pink" }}>
-            <div>Content: {p.content}</div>
-            <div>Author: {p.author.toString()}</div>
+            <MessageView message={p} />
           </li>
         ))}
-        {messages.map(({ content, author }, i) => (
+        {messages.map((p, i) => (
           <li key={messages.length - i}>
-            <div>Content: {content}</div>
-            <div>Author: {author.toString()}</div>
+            <MessageView message={p} />
           </li>
         ))}
       </ul>

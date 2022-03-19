@@ -8,8 +8,7 @@ import { encapsulated, ObservableMonad as O } from "./monad/Observable";
 
 export type OwnerStatus = "Unknown" | "Unowned" | "OwnedByOthers" | "IsOwner";
 
-export const obOwner = encapsulated(
-  nothing as Maybe<Principal | null>,
+export const obOwner = encapsulated<Maybe<Principal | null>>(nothing)(
   (owner) => ({
     update: () =>
       M.fmapU(obMainActor.current(), async (actor) => {

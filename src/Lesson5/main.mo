@@ -4,7 +4,7 @@ import Option "mo:base/Option";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 
-actor {
+actor Microblog {
   type Time = Time.Time;
   type List<E> = List.List<E>;
 
@@ -62,7 +62,12 @@ actor {
     assert(?caller == owner);
 
     let time = Time.now();
-    messages := List.push({ content; time; author = caller }, messages);
+    let author = Principal.fromActor(Microblog);
+    messages := List.push({ content; time; author }, messages);
+  };
+
+  public shared({ caller }) func clear(): async () {
+    messages := List.nil();
   };
 
   public shared query func posts(since: Time): async [Message] {
