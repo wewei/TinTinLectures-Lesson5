@@ -6,6 +6,7 @@ import { useObservable } from "../hooks/Observable";
 import { obOwner, obOwnerStatus } from "../model/Owner";
 
 import Microblog from "./Microblog";
+import Header from "./Header";
 
 export default function ({
   identity,
@@ -30,7 +31,12 @@ export default function ({
         </div>
       );
     case "IsOwner":
-      return <Microblog />;
+      return (
+        <div>
+          <Header logout={logout} />
+          <Microblog />
+        </div>
+      );
     case "OwnedByOthers":
       return (
         <div>

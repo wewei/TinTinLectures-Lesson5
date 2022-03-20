@@ -1,18 +1,20 @@
 import { ChangeEvent, useCallback, useEffect, useState } from "react";
 import { useObservable } from "../hooks/Observable";
 import { obMyPosts, obNewPost } from "../model/Message";
-import { fromMaybe, MaybeMonad as M, nothing } from "../model/monad/Maybe";
-import { ObservableMonad as O } from "../model/monad/Observable";
-import { nameFor } from "../model/Name";
+import { MaybeMonad as M, nothing } from "../model/monad/Maybe";
+import { obFollowees, obTimeline, postsFor } from "../model/Timeline";
 import MessageView from "./MessageView";
 
 export default () => {
-  const { messages, isRefreshing } = useObservable(obMyPosts);
+  const { messages, isRefreshing } = useObservable(obTimeline);
   const newPost = useObservable(obNewPost);
   const [content, setContent] = useState("");
+  console.log(messages);
 
   useEffect(() => {
+    obFollowees.update();
     obMyPosts.update();
+    obFollowees.current().forEach((cId) => postsFor(cId).update());
   }, []);
   return (
     <div>

@@ -67,6 +67,17 @@ export const ObservableMonad = monadFor({
   chain: Observable_Chain;
 };
 
+// Helpers
+export const all = <A>(oAs: Observable<A>[]): Observable<A[]> =>
+  observable(
+    oAs.map((oA) => oA.current()),
+    signal((notify) => {
+      const n = () => notify(oAs.map((oA) => oA.current()));
+      const unsubs = oAs.map((oA) => oA.subscribe(n));
+      return () => unsubs.forEach((unsub) => unsub());
+    })
+  );
+
 // Types
 export type Stateful<A> = {
   current: F<A>;

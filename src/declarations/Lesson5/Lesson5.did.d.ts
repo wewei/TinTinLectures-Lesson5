@@ -7,6 +7,7 @@ export interface Message {
 export type Time = bigint;
 export interface _SERVICE {
   'claim_owner' : () => Promise<undefined>,
+  'clear' : () => Promise<undefined>,
   'follow' : (arg_0: Principal) => Promise<undefined>,
   'follows' : () => Promise<Array<Principal>>,
   'get_name' : () => Promise<string>,

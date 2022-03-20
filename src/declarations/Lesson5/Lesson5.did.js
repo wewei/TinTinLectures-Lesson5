@@ -7,6 +7,7 @@ export const idlFactory = ({ IDL }) => {
   });
   return IDL.Service({
     'claim_owner' : IDL.Func([], [], []),
+    'clear' : IDL.Func([], [], []),
     'follow' : IDL.Func([IDL.Principal], [], []),
     'follows' : IDL.Func([], [IDL.Vec(IDL.Principal)], ['query']),
     'get_name' : IDL.Func([], [IDL.Text], ['query']),
