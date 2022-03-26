@@ -86,4 +86,12 @@ actor Microblog {
 
     List.toArray(messages);
   };
+
+  public shared({ caller }) func reset(): async () {
+    assert(?caller == owner);
+    owner := null;
+    name := "Anonymous";
+    followees := List.nil();
+    messages := List.nil();
+  };
 }

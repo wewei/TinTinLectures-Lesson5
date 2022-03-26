@@ -14,6 +14,7 @@ export const idlFactory = ({ IDL }) => {
     'get_owner' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
     'post' : IDL.Func([IDL.Text], [], []),
     'posts' : IDL.Func([Time], [IDL.Vec(Message)], ['query']),
+    'reset' : IDL.Func([], [], []),
     'set_name' : IDL.Func([IDL.Text], [], []),
     'timeline' : IDL.Func([Time], [IDL.Vec(Message)], []),
   });

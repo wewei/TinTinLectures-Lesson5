@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Observable } from "../model/monad/Observable";
+import { Observable } from "../monad/Observable";
 
 export const useObservable = <A>(oA: Observable<A>) => {
   const [state, setState] = useState<A>(oA.current());

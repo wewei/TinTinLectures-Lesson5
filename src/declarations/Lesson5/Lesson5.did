@@ -14,6 +14,7 @@ service : {
   get_owner: () -> (opt principal) query;
   post: (text) -> ();
   posts: (Time) -> (vec Message) query;
+  reset: () -> ();
   set_name: (text) -> ();
   timeline: (Time) -> (vec Message);
 }

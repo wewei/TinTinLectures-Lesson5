@@ -1,24 +1,45 @@
 import type { AuthenticatedViewProps } from "./IIAuth";
 
-import { useEffect } from "react";
-import { obIdentity } from "../model/Agent";
-import { useObservable } from "../hooks/Observable";
-import { obOwner, obOwnerStatus } from "../model/Owner";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import Microblog from "./Microblog";
-import Header from "./Header";
+import { createActor } from "../../../declarations/Lesson5";
+
+const CANISTER_ID = process.env.LESSON5_CANISTER_ID as string;
+
+type OwnerStatus = "Unknown" | "Unowned" | "OwnedByOthers" | "IsOwner";
 
 export default function ({
   identity,
   logout,
 }: AuthenticatedViewProps): JSX.Element {
-  const ownerStatus = useObservable(obOwnerStatus);
+  const [canisterId, setCanisterId] = useState(CANISTER_ID);
+  const [ownerStatus, setOwnerStatus] = useState<OwnerStatus>("Unknown");
+  const actor = useMemo(
+    () => createActor(canisterId, { agentOptions: { identity } }),
+    [canisterId, identity]
+  );
+
+  const updateOwnerStatus = useCallback(async () => {
+    const owner = await actor.get_owner();
+    if (owner.length === 0) {
+      setOwnerStatus("Unowned");
+    } else if (owner[0].toString() === identity.getPrincipal().toString()) {
+      setOwnerStatus("IsOwner");
+    } else {
+      setOwnerStatus("OwnedByOthers");
+    }
+  }, [canisterId, actor]);
 
   useEffect(() => {
-    obIdentity.set(identity);
-    obOwner.update();
-    // setTimeout(obOwner.update, 1000);
-  }, [obIdentity, identity]);
+    setOwnerStatus("Unknown");
+    updateOwnerStatus();
+  }, [updateOwnerStatus]);
+
+  const claimOwner = useCallback(async () => {
+    await actor.claim_owner();
+    await updateOwnerStatus();
+  }, []);
 
   switch (ownerStatus) {
     case "Unknown":
@@ -26,15 +47,18 @@ export default function ({
     case "Unowned":
       return (
         <div>
-          Click <button onClick={obOwner.update}>here</button> to claim
-          ownership
+          Click <button onClick={claimOwner}>here</button> to claim ownership
         </div>
       );
     case "IsOwner":
       return (
         <div>
-          <Header logout={logout} />
-          <Microblog />
+          <Microblog
+            actor={actor}
+            identity={identity}
+            canisterId={canisterId}
+            logout={logout}
+          />
         </div>
       );
     case "OwnedByOthers":
@@ -45,8 +69,7 @@ export default function ({
             ownership?
           </div>
           <div>
-            Click <button onClick={obOwner.update}>here</button> to claim
-            ownership
+            Click <button onClick={claimOwner}>here</button> to claim ownership
           </div>
         </div>
       );

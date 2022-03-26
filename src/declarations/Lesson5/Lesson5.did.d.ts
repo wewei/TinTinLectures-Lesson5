@@ -14,6 +14,7 @@ export interface _SERVICE {
   'get_owner' : () => Promise<[] | [Principal]>,
   'post' : (arg_0: string) => Promise<undefined>,
   'posts' : (arg_0: Time) => Promise<Array<Message>>,
+  'reset' : () => Promise<undefined>,
   'set_name' : (arg_0: string) => Promise<undefined>,
   'timeline' : (arg_0: Time) => Promise<Array<Message>>,
 }
