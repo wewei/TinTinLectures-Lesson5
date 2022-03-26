@@ -18,7 +18,6 @@ export default function ({
         setCanisterId={setCanisterId}
       />
       <MicroblogAppBody canisterId={canisterId} identity={identity} />
-      <Button onClick={logout}>Logout</Button>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { MicroblogActor } from "../model/Agent";
 import { Maybe, MaybeMonad as M, nothing } from "../model/monad/Maybe";
 import MessageView from "./MessageView";
-import { Button, Input, TextField } from "@mui/material";
+import { Button, Grid, Input, TextField } from "@mui/material";
 import { Message } from "../../../declarations/Lesson5/Lesson5.did";
 import { Principal } from "@dfinity/principal";
 import { createActor } from "../../../declarations/Lesson5";
@@ -129,54 +129,94 @@ export default ({ actor: actorMain, canisterId, identity }: MicroblogProps) => {
 
   return (
     <div>
-      <div>
-        <Input value={newName} onChange={(e) => setNewName(e.target.value)} />
-        <Button onClick={updateMyName}>Update Name</Button>
-        <Button onClick={reset}>Reset</Button>
-        <Button onClick={() => setFollowDialogOpen(true)}>Follow</Button>
-      </div>
+      <Grid container>
+        <Grid item xs={3}>
+          Change your name:
+        </Grid>
+        <Grid item xs={3}>
+          <Input
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={6}>
+          <Button onClick={updateMyName}>Update Name</Button>
+          <Button onClick={reset}>Reset</Button>
+          <Button onClick={() => setFollowDialogOpen(true)}>Follow</Button>
+        </Grid>
+      </Grid>
       <FollowDialog
         open={followDialogOpen}
         onCancel={() => setFollowDialogOpen(false)}
         onConfirm={follow}
       />
-      <div>
-        <Input value={content} onChange={(p) => setContent(p.target.value)} />
-        <span>&nbsp;</span>
-        <button onClick={post} disabled={content === "" || newPost !== nothing}>
-          Post
-        </button>
-      </div>
-      {filter && (
-        <div>
-          Filter: {nameMap.get(filter) ?? filter},{" "}
-          <a onClick={() => setFilter("")}>show all</a>
-        </div>
-      )}
-      <ul>
-        {M.fmapU(newPost, ({ content, time, author }) => (
-          <li style={{ backgroundColor: "pink" }}>
-            <MessageView
-              content={content}
-              time={time}
-              author={nameMap.get(author.toString()) || author.toString()}
-              onFilter={() => setFilter(author.toString())}
-            />
-          </li>
-        ))}
-        {(filter ? messages.get(filter) ?? [] : allMessages).map(
-          ({ content, time, author }, i, msgs) => (
-            <li key={msgs.length - i}>
-              <MessageView
-                content={content}
-                time={time}
-                author={nameMap.get(author.toString()) || author.toString()}
-                onFilter={() => setFilter(author.toString())}
-              />
-            </li>
-          )
-        )}
-      </ul>
+      <Grid container>
+        <Grid item xs={2}>
+          Type here:
+        </Grid>
+        <Grid item xs={9}>
+          <Input
+            value={content}
+            onChange={(p) => setContent(p.target.value)}
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={1}>
+          <Button
+            onClick={post}
+            disabled={content === "" || newPost !== nothing}
+          >
+            Post
+          </Button>
+        </Grid>
+      </Grid>
+      <Grid container spacing={2}>
+        <Grid item xs={9}>
+          {filter && (
+            <div>
+              Filter: {nameMap.get(filter) ?? filter},{" "}
+              <a onClick={() => setFilter("")}>show all</a>
+            </div>
+          )}
+          <ul>
+            {M.fmapU(newPost, ({ content, time, author }) => (
+              <li style={{ backgroundColor: "pink" }}>
+                <MessageView
+                  content={content}
+                  time={time}
+                  author={nameMap.get(author.toString()) || author.toString()}
+                  onFilter={() => setFilter(author.toString())}
+                />
+              </li>
+            ))}
+            {(filter ? messages.get(filter) ?? [] : allMessages).map(
+              ({ content, time, author }, i, msgs) => (
+                <li key={msgs.length - i}>
+                  <MessageView
+                    content={content}
+                    time={time}
+                    author={nameMap.get(author.toString()) || author.toString()}
+                    onFilter={() => setFilter(author.toString())}
+                  />
+                </li>
+              )
+            )}
+          </ul>
+        </Grid>
+        <Grid item xs={3}>
+          <div>Followees:</div>
+          <ul>
+            {followees.map((followee) => (
+              <li>
+                <a onClick={() => setFilter(followee)}>
+                  {nameMap.get(followee) ?? followee}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </Grid>
+      </Grid>
     </div>
   );
 };
