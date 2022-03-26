@@ -5,9 +5,11 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Input,
+  TextField,
 } from "@mui/material";
 import { useState } from "react";
+import Autocomplete from "@mui/material/Autocomplete";
+import { ALL_CANISTER_IDS } from "../AppMeta";
 
 export type FollowDialogProps = {
   onConfirm: (canisterId: string) => void;
@@ -22,14 +24,16 @@ export default function FollowDialog({
 }: FollowDialogProps) {
   const [canisterId, setCanisterId] = useState("");
   return (
-    <Dialog open={open} onClose={onCancel}>
+    <Dialog open={open} onClose={onCancel} fullWidth>
       <DialogTitle>Add a new followee</DialogTitle>
       <DialogContent>
         <DialogContentText>Canister Id:</DialogContentText>
-        <Input
-          autoFocus
-          value={canisterId}
-          onChange={(e) => setCanisterId(e.target.value)}
+        <Autocomplete
+          options={ALL_CANISTER_IDS}
+          onChange={(e, newValue) => setCanisterId(newValue ?? "")}
+          renderInput={(params) => (
+            <TextField {...params} fullWidth variant="standard" />
+          )}
         />
       </DialogContent>
       <DialogActions>

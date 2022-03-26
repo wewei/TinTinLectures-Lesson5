@@ -1,0 +1,20 @@
+type Time = int;
+type Message = 
+ record {
+   author: principal;
+   content: text;
+   time: Time;
+ };
+service : {
+  claim_owner: () -> ();
+  clear: () -> ();
+  follow: (principal) -> ();
+  follows: () -> (vec principal) query;
+  get_name: () -> (text) query;
+  get_owner: () -> (opt principal) query;
+  post: (text) -> ();
+  posts: (Time) -> (vec Message) query;
+  reset: () -> ();
+  set_name: (text) -> ();
+  timeline: (Time) -> (vec Message);
+}

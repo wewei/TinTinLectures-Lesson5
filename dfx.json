@@ -4,17 +4,28 @@
       "main": "src/Lesson5/main.mo",
       "type": "motoko"
     },
+    "Lesson5_Copy1": {
+      "main": "src/Lesson5/main.mo",
+      "type": "motoko"
+    },
+    "Lesson5_Copy2": {
+      "main": "src/Lesson5/main.mo",
+      "type": "motoko"
+    },
+    "Lesson5_Copy3": {
+      "main": "src/Lesson5/main.mo",
+      "type": "motoko"
+    },
+    "Lesson5_Copy4": {
+      "main": "src/Lesson5/main.mo",
+      "type": "motoko"
+    },
     "Lesson5_assets": {
-      "dependencies": [
-        "Lesson5"
-      ],
+      "dependencies": ["Lesson5"],
       "frontend": {
         "entrypoint": "src/Lesson5_assets/src/index.html"
       },
-      "source": [
-        "src/Lesson5_assets/assets",
-        "dist/Lesson5_assets/"
-      ],
+      "source": ["src/Lesson5_assets/assets", "dist/Lesson5_assets/"],
       "type": "assets"
     }
   },

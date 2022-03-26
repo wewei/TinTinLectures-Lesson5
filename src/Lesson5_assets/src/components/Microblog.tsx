@@ -14,30 +14,29 @@ export type MicroblogProps = {
   actor: MicroblogActor;
   canisterId: string;
   identity: Identity;
-  logout: () => void;
 };
+const compareMessages = ({ time: timeA }: Message, { time: timeB }: Message) =>
+  timeA > timeB ? -1 : timeA < timeB ? 1 : 0;
 
-export default ({
-  actor: actorMain,
-  canisterId,
-  identity,
-  logout,
-}: MicroblogProps) => {
-  const [messages, setMessages] = useState<Message[]>([]);
+export default ({ actor: actorMain, canisterId, identity }: MicroblogProps) => {
+  const [messages, setMessages] = useState<Map<string, Message[]>>(Map());
   const [content, setContent] = useState("");
   const [newPost, setNewPost] = useState<Maybe<Message>>(nothing);
   const [followees, setFollowees] = useState<Set<string>>(Set());
   const [nameMap, setNameMap] = useState<Map<string, string>>(Map());
   const [newName, setNewName] = useState(canisterId);
   const [followDialogOpen, setFollowDialogOpen] = useState(false);
-  const actorsFor = useMemo(
-    () => (cid: string) => createActor(cid, { agentOptions: { identity } }),
-    [identity]
+  const [filter, setFilter] = useState("");
+  const allMessages = useMemo(
+    () =>
+      ([] as Message[])
+        .concat(...messages.toArray().map(([, messages]) => messages))
+        .sort(compareMessages),
+    [messages]
   );
-
-  const actors = useMemo(
-    () => followees.map(actorsFor),
-    [followees, actorsFor]
+  const actorFor = useCallback(
+    (cid: string) => createActor(cid, { agentOptions: { identity } }),
+    [identity]
   );
 
   const post = useCallback(async () => {
@@ -47,18 +46,25 @@ export default ({
       author: Principal.from(canisterId),
     });
     setContent("");
+    setFilter("");
     await actorMain.post(content);
     await refreshTimeline();
     setNewPost(nothing);
   }, [actorMain, content, canisterId]);
 
-  const follow = useCallback(async (followee: string) => {
-    if (!followees.has(followee)) {
-      setFollowees(followees.add(followee));
-      await actorMain.follow(Principal.from(followee));
-      setNameMap(nameMap.set(followee, await actorsFor(followee).get_name()));
-    }
-  }, []);
+  const follow = useCallback(
+    async (followee: string) => {
+      setFollowDialogOpen(false);
+      if (!followees.has(followee)) {
+        setFollowees((followees) => followees.add(followee));
+        await actorMain.follow(Principal.from(followee));
+        const name = await actorFor(followee).get_name();
+        setNameMap((nameMap) => nameMap.set(followee, name));
+      }
+      await refreshTimeline();
+    },
+    [followees, actorMain, actorFor]
+  );
 
   const refreshFollowees = useCallback(async () => {
     setFollowees(
@@ -67,22 +73,23 @@ export default ({
   }, [actorMain]);
 
   const refreshTimeline = useCallback(async () => {
-    const timestamp = messages.length > 0 ? messages[0].time : BigInt(0);
-    const posts = ([] as Message[])
-      .concat(
-        ...(await Promise.all(
-          actors.add(actorMain).map((act) => act.posts(timestamp))
-        ))
-      )
-      .sort(({ time: timeA }, { time: timeB }) =>
-        timeA > timeB ? -1 : timeA < timeB ? 1 : 0
+    followees.add(canisterId).forEach(async (canisterId) => {
+      const msgs = messages.get(canisterId) ?? [];
+      const timestamp = msgs.length > 0 ? msgs[0].time : BigInt(0);
+      const newMsgs = (await actorFor(canisterId).posts(timestamp)).sort(
+        compareMessages
       );
-    setMessages((messages) => [...posts, ...messages]);
-  }, [canisterId, actors, actorMain, messages]);
+      if (newMsgs.length > 0) {
+        setMessages((messages) =>
+          messages.set(canisterId, msgs.concat(newMsgs))
+        );
+      }
+    });
+  }, [canisterId, followees]);
 
   const refreshMyName = useCallback(async () => {
     const name = await actorMain.get_name();
-    setNameMap(nameMap.set(canisterId, name));
+    setNameMap((nameMap) => nameMap.set(canisterId, name));
     setNewName(name);
   }, [canisterId, actorMain, nameMap]);
 
@@ -97,19 +104,37 @@ export default ({
     window.location.reload();
   }, [actorMain]);
 
+  const refreshNames = useCallback(async () => {
+    followees.forEach(async (followee) => {
+      const name = await actorFor(followee).get_name();
+      setNameMap((nameMap) => nameMap.set(followee, name));
+    });
+  }, [followees, actorFor]);
+
+  useEffect(() => {
+    refreshMyName();
+  }, [refreshMyName]);
+
+  useEffect(() => {
+    refreshFollowees();
+  }, [refreshFollowees]);
+
   useEffect(() => {
     refreshTimeline();
-    refreshFollowees();
-    refreshMyName();
-  }, []);
+  }, [refreshTimeline]);
+
+  useEffect(() => {
+    refreshNames();
+  }, [refreshNames]);
 
   return (
     <div>
-      <Button onClick={logout}>Logout</Button>
-      <Input value={newName} onChange={(e) => setNewName(e.target.value)} />
-      <Button onClick={updateMyName}>Update Name</Button>
-      <Button onClick={reset}>Reset</Button>
-      <Button onClick={() => setFollowDialogOpen(true)}>Follow</Button>
+      <div>
+        <Input value={newName} onChange={(e) => setNewName(e.target.value)} />
+        <Button onClick={updateMyName}>Update Name</Button>
+        <Button onClick={reset}>Reset</Button>
+        <Button onClick={() => setFollowDialogOpen(true)}>Follow</Button>
+      </div>
       <FollowDialog
         open={followDialogOpen}
         onCancel={() => setFollowDialogOpen(false)}
@@ -122,6 +147,12 @@ export default ({
           Post
         </button>
       </div>
+      {filter && (
+        <div>
+          Filter: {nameMap.get(filter) ?? filter},{" "}
+          <a onClick={() => setFilter("")}>show all</a>
+        </div>
+      )}
       <ul>
         {M.fmapU(newPost, ({ content, time, author }) => (
           <li style={{ backgroundColor: "pink" }}>
@@ -129,18 +160,22 @@ export default ({
               content={content}
               time={time}
               author={nameMap.get(author.toString()) || author.toString()}
+              onFilter={() => setFilter(author.toString())}
             />
           </li>
         ))}
-        {messages.map(({ content, time, author }, i) => (
-          <li key={messages.length - i}>
-            <MessageView
-              content={content}
-              time={time}
-              author={nameMap.get(author.toString()) || author.toString()}
-            />
-          </li>
-        ))}
+        {(filter ? messages.get(filter) ?? [] : allMessages).map(
+          ({ content, time, author }, i, msgs) => (
+            <li key={msgs.length - i}>
+              <MessageView
+                content={content}
+                time={time}
+                author={nameMap.get(author.toString()) || author.toString()}
+                onFilter={() => setFilter(author.toString())}
+              />
+            </li>
+          )
+        )}
       </ul>
     </div>
   );

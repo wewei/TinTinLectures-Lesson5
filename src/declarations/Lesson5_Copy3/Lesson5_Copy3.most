@@ -1,0 +1,11 @@
+// Version: 1.0.0
+type List<T> = ?(T, List<T>);
+type Message = {author : Principal; content : Text; time : Time__1};
+type Time = Int;
+type Time__1 = Time;
+actor {
+  stable var followees : ?(Principal, List<Principal>);
+  stable var messages : ?(Message, List<Message>);
+  stable var name : Text;
+  stable var owner : ?Principal
+};
